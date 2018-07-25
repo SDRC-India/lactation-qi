@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<Configuration status="WARN" monitorInterval="30">
+
+	<Properties>
+		<Property name="LOG_PATTERN">
+			%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName}
+			--- [%15.15t] %-40.40c{1.} : %m%n%ex
+		</Property>
+	</Properties>
+
+	<Appenders>
+
+		<!-- Rolling File Appender -->
+		<RollingFile name="FileAppender"
+			fileName="/opt/lactation/logs/lactation-project.log" filePattern="logs/lactation-project-%d{yyyy-MM-dd}-%i.log">
+
+			<PatternLayout>
+				<Pattern>${LOG_PATTERN}</Pattern>
+			</PatternLayout>
+
+			<Policies>
+				<OnStartupTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="2 MB" />
+				<TimeBasedTriggeringPolicy />
+			</Policies>
+
+			<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+
+	</Appenders>
+
+	<Loggers>
+		<!-- <Logger name="lactation-log" level="error" additivity="false"> -->
+		<!-- <AppenderRef ref="FileAppender"></AppenderRef> -->
+		<!-- </Logger> -->
+
+		<Root level="info">
+			<AppenderRef ref="FileAppender"></AppenderRef>
+		</Root>
+	</Loggers>
+
+</Configuration>
