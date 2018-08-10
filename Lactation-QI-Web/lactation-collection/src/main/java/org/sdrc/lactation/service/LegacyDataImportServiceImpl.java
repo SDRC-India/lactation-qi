@@ -44,7 +44,7 @@ public class LegacyDataImportServiceImpl implements LegacyDataImportService {
 	private SimpleDateFormat sdfDateInteger = new SimpleDateFormat("ddMMyyyyHHmmssSSS");
 	private SimpleDateFormat sdfDateTimeDDFirst = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-	private static final String FILE_NAME = "/opt/lactation/data_dump/Rechecked_102Babies_r1.xlsx";
+	private static final String FILE_NAME = "/opt/lactation/data_dump/Rev2_Final_Compilation_12thJuly2018LactationProject_r2.xlsx";
 	private static final Logger log = LogManager.getLogger(SynchronizationServiceImpl.class);
 
 	@Autowired
@@ -434,7 +434,7 @@ public class LegacyDataImportServiceImpl implements LegacyDataImportService {
 	private void importPatientData(XSSFSheet patientSheet, Map<String, TypeDetails> typeDetailsMap, String username, String uuid, String sysOutFragment, Map<String, Area> areaMap)
 			throws ParseException {
 		List<Patient> patientList = new ArrayList<>();
-		for (int row = 1; row <= patientSheet.getLastRowNum(); row++) {
+		for (int row = 1; row <=51 ; row++) {//patientSheet.getLastRowNum()
 			
 			System.out.println(sysOutFragment + (row+1));
 			
@@ -446,110 +446,116 @@ public class LegacyDataImportServiceImpl implements LegacyDataImportService {
 			
 			XSSFRow xssfRow = patientSheet.getRow(row);
 
-			for (int cols = 0; cols < xssfRow.getLastCellNum(); cols++) {
-				Cell cell = xssfRow.getCell(cols);
-				String userName = null;
-
-				if (cell != null) {
-					switch (cols) {
-					case 1:
-						Date date = cell.getDateCellValue();
-//						String cellStringValue = dataFormatter.formatCellValue(cell);
-						patient.setCreatedDate(getTimestampFromString(sdfDateOnly.format(date)));
-						System.out.println(sysOutFragment + (row+1) + " column --> created date");
-						break;
-					case 4:
-						userName = generateUserNameForLegacyDataImport(areaMap.get(cell.getStringCellValue()));
-						patient.setCreatedBy(userName);
-						patient.setUpdatedBy(userName);
-						System.out.println("Fetching the hospital to which the baby belongs");
-						break;
-					case 6:
-						patient.setBabyCode(cell.getStringCellValue());
-						System.out.println(sysOutFragment + (row+1) + " column --> baby code");
-						break;
-					case 7:
-						if(cell.getCellType() == 0)
-							patient.setBabyCodeHospital(String.valueOf((int)cell.getNumericCellValue()));
-						else if(cell.getCellType() == 1)
-							patient.setBabyCodeHospital(cell.getStringCellValue());
-						 
-						System.out.println(sysOutFragment + (row+1) + " column --> baby code hospital");
-						break;
-					case 8:
-						patient.setBabyOf(cell.getStringCellValue());
-						System.out.println(sysOutFragment + (row+1) + " column --> baby of");
-						break;
-					case 9:
-						patient.setMothersAge((int) cell.getNumericCellValue());
-						System.out.println(sysOutFragment + (row+1) + " column --> mothers age");
-						break;
-					case 12:
-						patient.setDeliveryDateAndTime(getTimestampFromStringWithDateAndTime(cell.getStringCellValue()));
-						System.out.println(sysOutFragment + (row+1) + " column --> deilvery date and time");
-						break;
-					case 13:
-						patient.setDeliveryMethod(typeDetailsMap.get(cell.getStringCellValue()));
-						System.out.println(sysOutFragment + (row+1) + " column --> deilvery method");
-						break;
-					case 14:
-						patient.setBabyWeight(cell.getNumericCellValue());
-						System.out.println(sysOutFragment + (row+1) + " column --> baby weight");
-						break;
-					case 15:
-						patient.setGestationalAgeInWeek((int) cell.getNumericCellValue());
-						System.out.println(sysOutFragment + (row+1) + " column --> gestational age in weeks");
-						break;
-					case 16:
-						patient.setMothersPrenatalIntent(typeDetailsMap.get(cell.getStringCellValue()));
-						System.out.println(sysOutFragment + (row+1) + " column --> mothers prenatal intent");
-						break;
-					case 17:
-						patient.setParentsKnowledgeOnHmAndLactation(typeDetailsMap.get(cell.getStringCellValue()));
-						System.out.println(
-								sysOutFragment + (row+1) + " column --> Parents Knowledge On Hm And Lactation");
-						break;
-					case 18:
-						patient.setTimeTillFirstExpression(String.valueOf(cell.getNumericCellValue()));
-						System.out.println(cell.getNumericCellValue());
-						System.out.println(sysOutFragment + (row+1) + " column --> Time till first expression");
-						break;
-					case 19:
-						patient.setInpatientOrOutPatient(typeDetailsMap.get(cell.getStringCellValue()));
-						System.out.println(sysOutFragment + (row+1) + " column --> Inpatient or outpatient");
-						break;
-					case 20:
-						if (patient != null && patient.getInpatientOrOutPatient() != null && patient.getInpatientOrOutPatient().getId() == 13) {
-							Date admissionDate = cell.getDateCellValue();
-							patient.setAdmissionDateForOutdoorPatients(getTimestampFromString(sdfDateOnly.format(admissionDate)));
-							System.out.println(sysOutFragment + (row+1) + " column --> admission date for outdoor patients");
-						}
-						break;
-					case 21:
-						patient.setBabyAdmittedTo(typeDetailsMap.get(cell.getStringCellValue()));
-						System.out.println(sysOutFragment + (row+1) + " column --> baby admitted to");
-						break;
-					case 22:
-						patient.setNicuAdmissionReason(reasonsToIds(cell.getStringCellValue(), typeDetailsMap));
-						System.out.println(sysOutFragment + (row+1) + " column --> nicu admission reason");
-						break;
-					case 23:
-						if(cell.getCellType() == Cell.CELL_TYPE_NUMERIC){
-							Date dischargeDate = cell.getDateCellValue();
-							patient.setDischargeDate(getTimestampFromString(sdfDateOnly.format(dischargeDate)));
-						}else if(cell.getCellType() == Cell.CELL_TYPE_STRING)
-							patient.setDischargeDate(getTimestampFromString(cell.getStringCellValue()));
+			if(xssfRow != null) {
+				for (int cols = 0; cols < xssfRow.getLastCellNum(); cols++) {
+					Cell cell = xssfRow.getCell(cols);
+					String userName = null;
+	
+					if (cell != null) {
+						switch (cols) {
+						case 1:
+							Date date = cell.getDateCellValue();
+	//						String cellStringValue = dataFormatter.formatCellValue(cell);
+							patient.setCreatedDate(getTimestampFromString(sdfDateOnly.format(date)));
+							System.out.println(sysOutFragment + (row+1) + " column --> created date");
+							break;
+						case 4:
+							userName = generateUserNameForLegacyDataImport(areaMap.get(cell.getStringCellValue()));
+							patient.setCreatedBy(userName);
+							patient.setUpdatedBy(userName);
+							System.out.println("Fetching the hospital to which the baby belongs");
+							break;
+						case 6:
+							patient.setBabyCode(cell.getStringCellValue());
+							System.out.println(sysOutFragment + (row+1) + " column --> baby code");
+							break;
+						case 7:
+							if(cell.getCellType() == 0)
+								patient.setBabyCodeHospital(String.valueOf((int)cell.getNumericCellValue()));
+							else if(cell.getCellType() == 1)
+								patient.setBabyCodeHospital(cell.getStringCellValue());
+							 
+							System.out.println(sysOutFragment + (row+1) + " column --> baby code hospital");
+							break;
+						case 8:
+							patient.setBabyOf(cell.getStringCellValue());
+							System.out.println(sysOutFragment + (row+1) + " column --> baby of");
+							break;
+						case 9:
+							patient.setMothersAge((int) cell.getNumericCellValue());
+							System.out.println(sysOutFragment + (row+1) + " column --> mothers age");
+							break;
+						case 12:
+							patient.setDeliveryDateAndTime(getTimestampFromStringWithDateAndTime(cell.getStringCellValue()));
+							System.out.println(sysOutFragment + (row+1) + " column --> deilvery date and time");
+							break;
+						case 13:
+							patient.setDeliveryMethod(typeDetailsMap.get(cell.getStringCellValue()));
+							System.out.println(sysOutFragment + (row+1) + " column --> deilvery method");
+							break;
+						case 14:
+							patient.setBabyWeight(cell.getNumericCellValue());
+							System.out.println(sysOutFragment + (row+1) + " column --> baby weight");
+							break;
+						case 15:
+							patient.setGestationalAgeInWeek((int) cell.getNumericCellValue());
+							System.out.println(sysOutFragment + (row+1) + " column --> gestational age in weeks");
+							break;
+						case 16:
+							patient.setMothersPrenatalIntent(typeDetailsMap.get(cell.getStringCellValue()));
+							System.out.println(sysOutFragment + (row+1) + " column --> mothers prenatal intent");
+							break;
+						case 17:
+							patient.setParentsKnowledgeOnHmAndLactation(typeDetailsMap.get(cell.getStringCellValue()));
+							System.out.println(
+									sysOutFragment + (row+1) + " column --> Parents Knowledge On Hm And Lactation");
+							break;
+						case 18:
+							if(cell.getCellType() == Cell.CELL_TYPE_BLANK)
+								patient.setTimeTillFirstExpression(null);
+							else
+								patient.setTimeTillFirstExpression(String.valueOf(cell.getNumericCellValue()));
 							
-						System.out.println(sysOutFragment + (row+1) + " column --> discharge date");
-						break;
-					default:
-						log.error("Patient: error occured in switch case for row --> " + (row+1) + " column ---> " + (cols+1));
+							System.out.println(cell.getNumericCellValue());
+							System.out.println(sysOutFragment + (row+1) + " column --> Time till first expression");
+							break;
+						case 19:
+							patient.setInpatientOrOutPatient(typeDetailsMap.get(cell.getStringCellValue()));
+							System.out.println(sysOutFragment + (row+1) + " column --> Inpatient or outpatient");
+							break;
+						case 20:
+							if (patient != null && patient.getInpatientOrOutPatient() != null && patient.getInpatientOrOutPatient().getId() == 13) {
+								Date admissionDate = cell.getDateCellValue();
+								patient.setAdmissionDateForOutdoorPatients(getTimestampFromString(sdfDateOnly.format(admissionDate)));
+								System.out.println(sysOutFragment + (row+1) + " column --> admission date for outdoor patients");
+							}
+							break;
+						case 21:
+							patient.setBabyAdmittedTo(typeDetailsMap.get(cell.getStringCellValue()));
+							System.out.println(sysOutFragment + (row+1) + " column --> baby admitted to");
+							break;
+						case 22:
+							patient.setNicuAdmissionReason(reasonsToIds(cell.getStringCellValue(), typeDetailsMap));
+							System.out.println(sysOutFragment + (row+1) + " column --> nicu admission reason");
+							break;
+						case 23:
+							if(cell.getCellType() == Cell.CELL_TYPE_NUMERIC){
+								Date dischargeDate = cell.getDateCellValue();
+								patient.setDischargeDate(getTimestampFromString(sdfDateOnly.format(dischargeDate)));
+							}else if(cell.getCellType() == Cell.CELL_TYPE_STRING)
+								patient.setDischargeDate(getTimestampFromString(cell.getStringCellValue()));
+								
+							System.out.println(sysOutFragment + (row+1) + " column --> discharge date");
+							break;
+						default:
+							log.error("Patient: error occured in switch case for row --> " + (row+1) + " column ---> " + (cols+1));
+						}
 					}
 				}
-			}
 			
-			if(patient.getBabyCode() != null)
-				patientList.add(patient);
+				if(patient.getBabyCode() != null && patient.getCreatedDate() != null)
+					patientList.add(patient);
+			}
 		}
 
 		if(patientList != null && !patientList.isEmpty())

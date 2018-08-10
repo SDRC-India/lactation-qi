@@ -167,7 +167,8 @@ public class DataDumpServiceImpl implements DataDumpService {
 					colNum++;
 					row.createCell(colNum).setCellValue(patient.getDischargeDate() == null ? "" : sdfDateOnly.format(patient.getDischargeDate()));
 					colNum++;
-					row.createCell(colNum).setCellValue(patient.getNicuAdmissionReason().length() == 0 ? "" : arrayToString(patient.getNicuAdmissionReason(), typeDetailsMap));
+					row.createCell(colNum).setCellValue(patient.getNicuAdmissionReason() == null || patient.getNicuAdmissionReason().length() == 0 ? "" : 
+						arrayToString(patient.getNicuAdmissionReason(), typeDetailsMap));
 					colNum++;
 					row.createCell(colNum).setCellValue(patient.getTimeTillFirstExpression() == null ? "" : patient.getTimeTillFirstExpression());
 					colNum++;
@@ -356,6 +357,7 @@ public class DataDumpServiceImpl implements DataDumpService {
 	
 				workbook.write(fileOut);
 			} catch (Exception e) {
+				e.printStackTrace();
 				log.error("Error - DataDumpServiceImpl - exportDataInExcel - " + e);
 			}
 		}else{
